@@ -34,6 +34,8 @@ setenforce 0
 vi /etc/selinux/config
 # 编辑这个文件 添加如下新的一行 然后重启
 SELINUX=disabled
+
+reboot
 ```
 
 
