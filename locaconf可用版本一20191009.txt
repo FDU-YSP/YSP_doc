@@ -1,0 +1,89 @@
+[[local|localrc]]
+#load the external LBaas plugin
+# enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
+enable_plugin neutron https://git.trystack/openstack/neutron
+enable_plugin octavia https://git.openstack.org/openstack/octavia
+enable_plugin octavia-dashboard http://git.trystack.cn/openstack/octavia-dashboard.git
+
+enable_plugin zun https://git.openstack.org/openstack/zun $TARGET_BRANCH
+enable_plugin zun-ui https://git.openstack.org/openstack/zun-ui $TARGET_BRANCH
+enable_plugin devstack-plugin-container https://git.openstack.org/openstack/devstack-plugin-container $TARGET_BRANCH
+enable_plugin kuryr-libnetwork https://git.openstack.org/openstack/kuryr-libnetwork $TARGET_BRANCH
+
+# ===== BEGIN localrc =====
+HOST_IP=10.10.87.64   #本地IP地址
+SERVICE_HOST=10.10.87.64   #控制节点IP地址
+
+DATABASE_PASSWORD=stackdatabase
+RABBIT_PASSWORD=stackrabbit
+SERVICE_PASSWORD=servicepassword
+ADMIN_PASSWORD=admin
+# enable logging
+LOGFILE=$DEST/logs/stack.sh.log
+VERBOSE=True
+LOG_COLOR=True
+
+WSGI_MODE=mod_wsgi
+NOVA_USE_MOD_WSGI=False 
+CINDER_USE_MOD_WSGI=False
+ZUN_USE_UWSGI=False
+GIT_BASE=http://git.trystack.cn
+TARGET_BRANCH=stable/rocky
+SERVICE_IP_VERSION=4
+API_WORKERS=4
+MULTI_HOST=True
+DATABASE_TYPE=mysql
+MYSQL_HOST=$SERVICE_HOST
+RABBIT_HOST=$SERVICE_HOST
+GLANCE_HOSTPORT=$SERVICE_HOST:9292
+NOVA_VNC_ENABLED=True
+NOVNCPROXY_URL="http://$SERVICE_HOST:6080/vnc_auto.html"
+VNCSERVER_LISTEN=$HOST_IP
+VNCSERVER_PROXYCLIENT_ADDRESS=$VNCSERVER_LISTEN
+DOWNLOAD_DEFAULT_IMAGES=False
+NEUTRON_CREATE_INITIAL_NETWORKS=False
+
+
+# Pre-requisite
+ENABLED_SERVICES=rabbit,mysql,key
+# Horizon
+ENABLED_SERVICES+=,horizon
+# Glance
+ENABLED_SERVICES+=,g-api,g-reg
+# Nova
+ENABLED_SERVICES+=,n-api,n-cpu,n-cond,n-sch
+
+# Neutron
+# ENABLED_SERVICES+=,q-svc,q-agt,q-dhcp,q-l3,q-meta
+ENABLED_SERVICES+=,neutron-api,neutron-agent,neutron-dhcp,neutron-l3
+ENABLED_SERVICES+=,neutron-metadata-agent,neutron-qos
+
+# Octavia
+ENABLED_SERVICES+=,octavia,o-cw,o-hk,o-hm,o-api,o-da
+
+# Cinder
+ENABLED_SERVICES+=,c-api,c-vol,c-sch
+# Tempest
+# ENABLED_SERVICES+=,tempest
+
+
+# ENABLED_SERVICES=n-cpu,q-agt,placement-client,zun-compute,kuryr-libnetwork,horizon   #计算节点使用
+# disable_service tempest dstat q-l3 etcd3 c-vol  #计算节点使用
+# disable_service tempest dstat q-l3   #控制节点使用
+disable_service tempest dstat 
+
+KURYR_CAPABILITY_SCOPE=global
+KURYR_PROCESS_EXTERNAL_CONNECTIVITY=False
+KURYR_ETCD_PORT=2379
+
+Q_AGENT=linuxbridge
+Q_ML2_TENANT_NETWORK_TYPE=vlan
+ENABLE_TENANT_VLANS=True
+TENANT_VLAN_RANGE=210:211
+#LB_PHYSICAL_INTERFACE=enp3s0f0
+# [[post-config|/$Q_PLUGIN_CONF_FILE]]
+[ml2]
+mechanism_drivers = linuxbridge
+
+echo $ENABLED_SERVICES
+# ===== END localrc =====
