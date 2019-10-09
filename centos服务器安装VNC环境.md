@@ -8,39 +8,50 @@
 # 可参考https://linux.cn/article-5335-1.html
 
 yum -y install @x11 @gnome tigervnc-server
-yum -y remove gnome-initial-setup #取消GNOME引导设置程序
-yum -y remove PackageKit #取消YUM源后台自动更新
+yum -y remove gnome-initial-setup 
+#取消GNOME引导设置程序
+
+yum -y remove PackageKit 
+#取消YUM源后台自动更新
 
 systemctl set-default graphical
-
 #设置默认启动runlevel 5
-systemctl isolate graphical.target #启动runlevel5
-systemctl enable vncserver@:1 #对应端口号5901,注意避免与虚拟机端口号冲突
+
+systemctl isolate graphical.target 
+#启动runlevel5
+
+systemctl enable vncserver@:1 
+#对应端口号5901,注意避免与虚拟机端口号冲突 设置开机自启
 
 #修改service文件，以root用户为例
 vim /etc/systemd/system/multi-user.target.wants/vncserver\@\:1.service
 ExecStart=/usr/sbin/runuser -l root -c "/usr/bin/vncserver %i"
 PIDFile=/root/.vnc/%H%i.pid
 
-systemctl daemon-reload #重新加载systemd服务配置文件
-vncpasswd #设置当前用户密码
+systemctl daemon-reload 
+#重新加载systemd服务配置文件
+
+vncpasswd 
+#设置当前用户密码
+
 systemctl start vncserver@:1
+# 这是一项服务的形式，需要启动
+
 #防火墙放行TCP 5901端口或直接禁用防火墙
 systemctl stop firewalld
 systemctl disable firewalld
 
+-------------------------------------如果配置多个端口-----------------------------------------
 systemctl enable vncserver@:1
 # 对应端口号5901, 注意避免与虚拟机端口号冲突
- 
 systemctl enable vncserver@:2
 # 对应端口号5902（如果要创建两个虚拟桌面的话）
- 
+
 # 修改service文件，以root用户为例
 vim /etc/systemd/system/multi-user.target.wants/vncserver\@\:1.service
 # 添加下面两行
 ExecStart=/usr/sbin/runuser -l root -c "/usr/bin/vncserver %i"
 PIDFile=/root/.vnc/%H%i.pid
- 
  
 systemctl daemon-reload #重新加载systemd服务配置文件
 vncpasswd #设置当前用户密码
@@ -48,7 +59,8 @@ systemctl start vncserver@:1 <br>
 # 防火墙放行TCP 5901端口或直接禁用防火墙
 systemctl stop firewalld
 systemctl disable firewalld
- 
+---------------------------------------------结束-----------------------------------------
+
 # 在本地电脑上下载并安装vnc viewer(client)，下载地址如下
 https://www.tightvnc.com/download.html
  
