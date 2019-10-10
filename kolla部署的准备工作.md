@@ -84,5 +84,28 @@ pip install docker
 pip install -U docker
 ```
 
+配置Docker的私有仓库 (queens版以后kolla不提供，只能自己拉 所有的包上传到本地仓库)
 
+限于国内网络环境的问题，如果直接在线安装很容易失败，所以我们非常有必要建立一个本地仓 库。建立本地仓库所需要的OpenStack的各个组件的镜像，既可以通过 Kolla 进行 build ，也可 以直接下载官网制作好的镜像。   运行 Registry 服务的容器，由于 5000 端口与 keystone 端口号冲突，所以我们需要修改其映射 到本地 4000 端口上:
+
+```bash
+docker run -d -v /opt/registry:/var/lib/registry -p 4000:5000 --restart=always --name registry registry:2
+
+# 查看是否成功启动
+docker ps
+```
+
+运行以上命令后，会自动在线拉取 registry:2 的镜像，如果因为网络环境不能够正常下载，也可 以在一个网络状况比较好的机器上先下载好，然后导出为 .tar 包，再在相应的机器上导入:
+
+```bash
+# 在网络好的机器上执行
+docker pull registry:2
+docker images
+docker save -o registry_v2.tar registry:2
+
+# 在目标机器上执行如下命令，再执行上面的命令块，将registry服务用容器跑起来
+docker load -i ./registry_v2.tar 
+docker image
+
+```
 
