@@ -109,3 +109,66 @@ docker image
 
 ```
 
+在浏览器中输入：[SERVICE_IP]:4000/v2/_catalog，如果能够进入，则说明已经成功安装了本地仓 库。
+
+
+
+安装Kolla­ansible部署工具
+
+此过程只需要在部署机上面执行，kolla­ansible既可以使用 pip 来安装，也可以通过 git 源码安装，本次通过源码安装：   下载源码包，一定要下载对应的版本，部署的是Q版，所以下载Q版的kolla­ansible
+
+```bash
+cd /opt
+git clone http://git.trystack.cn/openstack/kolla-ansible -b stable/rocky
+```
+
+安装kolla­-ansible：
+
+```bash
+cd  kolla-ansible
+pip install ./     (或者python setup.py develop)
+```
+
+复制配置文件和inventory文件：
+
+```bash
+cd /opt/kolla-ansible/
+cp -r etc/kolla /etc/kolla
+cp -r ansible/inventory /home/inventory/
+```
+
+如果是在虚拟机里装kolla，希望可以启动再启动虚拟机，那么你需要把virt_type=qemu，默认是 kvm：
+
+```bash
+mkdir -p /etc/kolla/config/nova
+cat << EOF > /etc/kolla/config/nova-compute.conf
+[libvirt]
+virt_type=qume
+cpu_mode=none
+EOF
+```
+
+生成密码文件：
+
+```bash
+kolla-genpwd
+```
+
+修改登录dashboard的admin用户的登录密码：
+
+```bash
+vim /etc/kolla/passwords.yml
+# 修改下面的字段
+keystone_admin_password: admin
+```
+
+如果安装zun组件，必须安装etcd和kuryr. 安装etcd过程中，kolla­ansible会出现etcd起不来的现 象，此时需要修改kolla­ansible文件
+
+```bash
+vim /usr/share/kolla-ansible/ansible/roles/etcd/defaults/main.yml
+把
+ETCD_LISTEN_CLIENT_URLS: "{{ internal_protocol }}://{{ api_interface_address }}:{{ etcd_client_port }}"
+修改为
+ETCD_LISTEN_CLIENT_URLS: "{{ internal_protocol }}://0.0.0.0:{{ etcd_client_port }}"
+```
+
