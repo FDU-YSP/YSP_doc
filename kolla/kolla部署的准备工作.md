@@ -172,3 +172,10 @@ ETCD_LISTEN_CLIENT_URLS: "{{ internal_protocol }}://{{ api_interface_address }}:
 ETCD_LISTEN_CLIENT_URLS: "{{ internal_protocol }}://0.0.0.0:{{ etcd_client_port }}"
 ```
 
+开始部署
+由于我们采用的是多节点物理机部署，在部署之前，我们需要修改 globals.yml 和 multinode 两个配置文件（单节点的话修改的是allinone.yml的配置文件）。
+
+```bash
+vim /etc/kolla/globals.yml
+```
+
