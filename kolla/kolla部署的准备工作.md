@@ -179,3 +179,18 @@ ETCD_LISTEN_CLIENT_URLS: "{{ internal_protocol }}://0.0.0.0:{{ etcd_client_port 
 vim /etc/kolla/globals.yml
 ```
 
+编辑好了一个初版的globals.yml文件，请见hithub。
+
+接下来编辑inventory文件，分为all-in-one和multinode文件。An inventory is an Ansible file where we specify hosts and the groups that they belong to. We can use this to define node roles and access credentials.
+
+Kolla-Ansible comes with `all-in-one` and `multinode` example inventory files. The difference between them is that the former is ready for deploying single node OpenStack on localhost. If you need to use separate host or more than one node。
+
+```bash
+# 检查有没有错误，出现failed就要排错
+kolla-ansible -i ./all-in-one prechecks
+或者
+kolla-ansible -i ./multinode prechecks
+```
+
+因为用到octavia，需要一些特别的配置，参考：https://www.lijiawang.org/posts/kolla-octavia.html
+
