@@ -137,5 +137,10 @@ systemctl restart libvirtd
 ssh 192.168.122.X
 ```
 
+### 10.补充
 
+```bash
+# 查看正在运行的虚拟机列表
+cirsh list 
+```
 
