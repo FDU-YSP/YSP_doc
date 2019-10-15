@@ -194,3 +194,47 @@ kolla-ansible -i ./multinode prechecks
 
 因为用到octavia，需要一些特别的配置，参考：https://www.lijiawang.org/posts/kolla-octavia.html
 
+prechecks的时候可能会遇到octavia找不到证书的问题，参照上面的链接，进行如下操作：
+
+```bash
+git clone -b stable/rocky https://review.openstack.org/p/openstack/octavia
+cd ./octavia
+grep octavia_ca /etc/kolla/passwords.yml
+# 输出类似下面
+octavia_ca_password: mEUyBHLopKk501CX30WRnPuiDmoP3I7eNQIQbC6z
+
+sed -i 's/foobar/mEUyBHLopKk501CX30WRnPuiDmoP3I7eNQIQbC6z/g' bin/create_certificates.sh
+./bin/create_certificates.sh cert $(pwd)/etc/certificates/openssl.cnf
+```
+
+会生成一个文件夹cert
+
+```bash
+ls -al ./cert
+# 输出如下
+total 48
+drwxr-xr-x.  4 root root  271 Oct 14 21:59 .
+drwxr-xr-x. 19 root root 4096 Oct 14 21:59 ..
+-rw-r--r--.  1 root root 1294 Oct 14 21:59 ca_01.pem
+-rw-r--r--.  1 root root  989 Oct 14 21:59 client.csr
+-rw-r--r--.  1 root root 1704 Oct 14 21:59 client.key
+-rw-r--r--.  1 root root 4405 Oct 14 21:59 client-.pem
+-rw-r--r--.  1 root root 6109 Oct 14 21:59 client.pem
+-rw-r--r--.  1 root root   71 Oct 14 21:59 index.txt
+-rw-r--r--.  1 root root   21 Oct 14 21:59 index.txt.attr
+-rw-r--r--.  1 root root    0 Oct 14 21:59 index.txt.old
+drwxr-xr-x.  2 root root   20 Oct 14 21:59 newcerts
+drwx------.  2 root root   31 Oct 14 21:59 private
+-rw-r--r--.  1 root root    3 Oct 14 21:59 serial
+-rw-r--r--.  1 root root    3 Oct 14 21:59 serial.old
+```
+
+将认证放到kolla部署节点上的/etc/kolla/config/octavia目录里，首先要先在/etc/kolla目录下创建一个octavia文件
+
+```bash
+mkdir /etc/kolla/config
+mkdir /etc/kolla/config/octavia
+# 将生成的cert里的文件复制进去
+cp cert/{private/cakey.pem,ca_01.pem,client.pem}  /etc/kolla/config/octavia
+```
+
