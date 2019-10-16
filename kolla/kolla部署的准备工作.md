@@ -288,7 +288,7 @@ cd /usr/share/kolla-ansible/
 ./init-runonce 
 ```
 
-执行`./init-runonce` 可能会出现一些错误，比如`ImportError: cannot import name decorate`，把对应的包安装上`pip install decorate`。这个文件要下载一个img文件，建议进入init-runonce脚本文件看下载地址什么，下载什么版本，下载到那个文件夹，用浏览器下载上传到对应的文件夹，再执行`./init-runonce`。
+执行`./init-runonce` 可能会出现一些错误，比如`ImportError: cannot import name decorate`，把对应的包安装上`pip install decorator`。这个文件要下载一个img文件，建议进入init-runonce脚本文件看下载地址什么，下载什么版本，下载到那个文件夹，用浏览器下载上传到对应的文件夹，再执行`./init-runonce`。
 
 可以根据脚本最后运行完的提示运行如下命令，创建一个VM：
 

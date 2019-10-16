@@ -1,0 +1,15 @@
+[root@controller kolla-ansible]# openstack service list
++----------------------------------+-------------+----------------+
+| ID                               | Name        | Type           |
++----------------------------------+-------------+----------------+
+| 0ac114fe3f7e44d88abc27c3bb282f43 | keystone    | identity       |
+| 12869aee7fa5401b993e84ab14caafd6 | heat        | orchestration  |
+| 149a3ab974b64c6aabe61d3d78ccead0 | nova        | compute        |
+| 15929ee0757344459b88d559fd18326b | heat-cfn    | cloudformation |
+| 6c45ab3c36ce4bacb653a31a54f96689 | octavia     | load-balancer  |
+| 7c05c2251977455582ee2aece2782121 | nova_legacy | compute_legacy |
+| 885965e72cdb4faaac896fd29a1f4e79 | glance      | image          |
+| 9c516b6b4224461193483282c1d8c968 | placement   | placement      |
+| a4501be9625e44e7812911055cf14d73 | zun         | container      |
+| c0b1dd07c1ac465c971a1607300886b5 | neutron     | network        |
++----------------------------------+-------------+----------------+
