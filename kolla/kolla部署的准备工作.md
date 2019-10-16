@@ -187,9 +187,9 @@ Kolla-Ansible comes with `all-in-one` and `multinode` example inventory files. T
 
 ```bash
 # 检查有没有错误，出现failed就要排错
-kolla-ansible -i ./all-in-one prechecks
+kolla-ansible -i /home/inventory/all-in-one prechecks
 或者
-kolla-ansible -i ./multinode prechecks
+kolla-ansible -i /home/inventory/multinode prechecks
 ```
 
 因为用到octavia，需要一些特别的配置，参考：https://www.lijiawang.org/posts/kolla-octavia.html
@@ -238,3 +238,69 @@ mkdir /etc/kolla/config/octavia
 cp cert/{private/cakey.pem,ca_01.pem,client.pem}  /etc/kolla/config/octavia
 ```
 
+解决这个问题可以继续执行prechecks的命令，看看还有没有其他错误，直到没有fail出现才开始执行deploy
+
+```bash
+kolla-ansible -i /home/inventory/multinode deploy -v
+```
+
+如果中间出现错误则解决错误，最后执行成功以后大概如图：
+
+![1571192459986](C:\Users\ysp\AppData\Roaming\Typora\typora-user-images\1571192459986.png)
+
+可以执行`docker images`看看下载了哪些镜像，执行`docker ps -a`查看容器是否正常运行。
+
+如果没什么问题，可以在浏览器中输入你再`globals.yml`制定的`kolla_internal_vip_address`的IP 地址来访问 dashboard 。用户名为：admin，登陆密码为你再 passwords.yml 中制定的`keystone_admin_password`字段的值，我们配置的是admin。
+
+如果想要增加组件，可以直接修改 globals.yml 文件中的配置项，然后运行④中的命令。如果想要重新部署，可以使用如下命令清理环境，然后再次运行`kolla-ansible -i /home/inventory/multinode deploy`的命令。如果想清理环境重新来部署，执行命令`kolla-ansible -i /home/inventory/multinode destory`。会有一个提示你确认的过程，只需要按照它的提示，输入相应的命令选项确认即可。
+
+> Note:  在执行 destroy 命令之前一定要确保，当前OpenStack平台上没有存储镜像，也没有相应 的 instance 和 volume ,也没有swift的存储空间，总而言之，OpenStack上面除了配置选项 外，不能存有任何额外的东西，否则会导致清理环境失败。这点一定要切记，非常重要！！！
+
+验证部署并初始化
+
+部署完成后，我们需要进行验证，会在 /etc/kolla 目录下生成 admin-openrc.sh 文件：
+
+```bash
+kolla-ansible post-deploy
+```
+
+安装OpenStack的client端：
+
+```bash
+pip install python-openstackclient
+```
+
+编辑初始化脚本文件 /usr/share/kolla-ansible/init-runonce :
+
+```bash
+# 我的配置如下，根据自己的网卡的配置情况，做出相应的修改
+# This EXT_NET_CIDR is your public network,that you want to connect to the internet via.
+EXT_NET_CIDR='10.10.87.0/24'
+EXT_NET_RANGE='start=10.10.87.100,end=10.0.2.199'
+EXT_NET_GATEWAY='10.10.87.1'
+```
+
+运行初始化脚本，进行初始化：
+
+```bash
+source /etc/kolla/admin-openrc.sh
+cd /usr/share/kolla-ansible/
+./init-runonce 
+```
+
+执行`./init-runonce` 可能会出现一些错误，比如`ImportError: cannot import name decorate`，把对应的包安装上`pip install decorate`。这个文件要下载一个img文件，建议进入init-runonce脚本文件看下载地址什么，下载什么版本，下载到那个文件夹，用浏览器下载上传到对应的文件夹，再执行`./init-runonce`。
+
+可以根据脚本最后运行完的提示运行如下命令，创建一个VM：
+
+```bash
+# To deploy a demo instance, run:
+
+openstack server create \
+    --image cirros \
+    --flavor m1.tiny \
+    --key-name mykey \
+    --network demo-net \
+    demo1
+```
+
+登陆dashboard，正常使用OpenStack。
